@@ -57,7 +57,7 @@ class NoteIngestTool(BaseTool):
             default_factory=base_inference_chain,
         )
     )
-    embedding_model: Runnable[list[str], list[list[float]]] = Field(
+    ingest_tool: Runnable[list[str], list[list[float]]] = Field(
         description="The embedding model to use for the tool",
         default_factory=base_embedding_chain,
     )
@@ -82,7 +82,7 @@ class NoteIngestTool(BaseTool):
     ) -> str:
         """Use the tool synchronously."""
 
-        to_list = RunnableLambda(lambda x: [x])
+        to_list: Runnable = RunnableLambda(lambda x: [x]) | {"texts": RunnablePassthrough() }
         compile_to_simple_text = RunnableLambda(
             lambda inputs: self.text_formatter.format(**inputs)
         )
@@ -98,6 +98,7 @@ class NoteIngestTool(BaseTool):
                 "context": RunnableLambda(lambda x: self.context),
             },
             {
+                "formatted_note": itemgetter("formatted_note"),
                 "sentiments": RunnablePassthrough()
                 | self.prompt_tasks.sentiments_categorization
                 | self.inference_model
@@ -108,16 +109,23 @@ class NoteIngestTool(BaseTool):
                 | StrOutputParser(),
             },
             {
+                "bare_ingest": itemgetter("formatted_note") | to_list 
+                    | self.ingest_tool,
                 "sentiments": {
                     "sentiments": itemgetter("sentiments"),
                     "embedding": itemgetter("sentiments")
                     | to_list
-                    | self.embedding_model,
+                    | self.ingest_tool,
                 },
                 "summary": {
                     "summary": itemgetter("summary"),
-                    "embedding": itemgetter("summary") | to_list | self.embedding_model,
+                    "embedding": itemgetter("summary") | to_list | self.ingest_tool,
                 },
+            },
+            {
+                "bare_ingest": itemgetter("bare_ingest"),
+                "sentiments": itemgetter("sentiments"),
+                "summary": itemgetter("summary"),
             },
             RunnableLambda(lambda x: x)
         )

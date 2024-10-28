@@ -7,6 +7,7 @@ from langchain_openai.chat_models import ChatOpenAI
 from langchain import hub
 from pathlib import Path
 
+from app.tools.light_rag import LightRAGInterface
 from app.tools.text_ingestor import NoteIngestTool
 
 
@@ -40,8 +41,20 @@ add_routes(
     app,
     NoteIngestTool(
         context=Path("assets/personal/gabriel.md").read_text(encoding="utf-8"),
+        ingest_tool=LightRAGInterface(
+            user="gabriel",
+        ),
     ),
     path="/notes",
+)
+
+add_routes(
+    app,
+    LightRAGInterface(
+        user="gabriel",
+        insert_mode=False,
+    ),
+    path="/global",
 )
 
 if __name__ == "__main__":
