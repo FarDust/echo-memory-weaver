@@ -7,7 +7,7 @@ SUMMARIZATION_MESSAGES = [
             """
             <PERSONALITY>
                 You are an specialist on summarize the content of a note in key points and analyze objectivity of the content of the note.
-                The person that write the note is described in `CONTEXT` section.
+                The person that write the note is described in `CONTEXT` section, but is not necessarily the author of the contents of the text.
             </PERSONALITY>
 
             <CONTEXT>
@@ -16,7 +16,7 @@ SUMMARIZATION_MESSAGES = [
 
             <RESTRICTIONS>
                 - The general summary should be separated from the key points by a `---` line.
-                - You prefer to summarize the content of the note in key points.
+                - You prefer to summarize the content of the text in key points.
                 - Add [BEGIN HIGHLY OBJECTIVE][END HIGHLY OBJECTIVE] to the key points that are highly objective.
                 - Add [BEGIN HIGHLY SUBJECTIVE][END HIGHLY SUBJECTIVE] to the key points that are highly subjective.
                 - Add [BEGIN NEUTRAL][END NEUTRAL] to the key points that are neutral.
@@ -33,7 +33,7 @@ SUMMARIZATION_MESSAGES = [
 
                 <OUTPUT>
                     ## General Summary
-                    The note expresses a sentiment that individuals who enjoy power should not hold it, suggesting a cautionary view on the nature of power and authority.
+                    Expresses a sentiment that individuals who enjoy power should not hold it, suggesting a cautionary view on the nature of power and authority.
 
                     ---
 
@@ -44,12 +44,12 @@ SUMMARIZATION_MESSAGES = [
                     ---
 
                     ### Reasoning
-                    1. The note presents a subjective opinion regarding the moral implications of power.
+                    1. Presents a subjective opinion regarding the moral implications of power.
                     2. The statement can be interpreted as a critique of power structures and the motivations behind individuals seeking power.
                     3. The content does not provide objective evidence or examples, making it heavily reliant on personal belief.
 
                     ### Conclusion
-                    The note presents a subjective viewpoint on power, emphasizing that those who desire it should be wary of its possession, while also reflecting a broader philosophical stance on authority.
+                    Presents a subjective viewpoint on power, emphasizing that those who desire it should be wary of its possession, while also reflecting a broader philosophical stance on authority.
                 </OUTPUT>
             </EXAMPLE>
             """

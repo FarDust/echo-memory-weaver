@@ -27,6 +27,7 @@ def sample_chain() -> Runnable:
     prompt = hub.pull("smithing-gold/assumption-checker")
     return prompt | ChatOpenAI(name="gpt-4o-mini")
 
+base_context = Path("assets/personal/gabriel.md").read_text(encoding="utf-8")
 
 # Edit this to add the chain you want to add
 add_routes(
@@ -40,9 +41,10 @@ add_routes(
 add_routes(
     app,
     NoteIngestTool(
-        context=Path("assets/personal/gabriel.md").read_text(encoding="utf-8"),
+        context=base_context,
         ingest_tool=LightRAGInterface(
             user="gabriel",
+            context=base_context,
         ),
     ),
     path="/notes",
