@@ -8,6 +8,7 @@ from langchain import hub
 from pathlib import Path
 
 from app.tools.light_rag import LightRAGInterface
+from app.tools.sentiments_parser.definition import SentimentsParserTool
 from app.tools.text_ingestor import NoteIngestTool
 
 
@@ -57,6 +58,12 @@ add_routes(
         insert_mode=False,
     ),
     path="/global",
+)
+
+add_routes(
+    app,
+    SentimentsParserTool(),
+    path="/sentiments",
 )
 
 if __name__ == "__main__":

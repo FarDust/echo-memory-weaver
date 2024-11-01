@@ -1,3 +1,4 @@
+from typing import Type
 from langchain_core.runnables import Runnable, RunnableLambda
 from langchain_core.messages import ChatMessage
 from langchain_openai.chat_models import ChatOpenAI
@@ -7,7 +8,7 @@ from pydantic import BaseModel
 
 def base_inference_chain(
         model_name: str = "gpt-4o-mini",
-        structured_output: BaseModel | None = None,
+        structured_output: Type[BaseModel] | None = None,
         **kwargs) -> Runnable:
     def _default_model_invoke(inputs) -> ChatMessage:
         chat_model: BaseChatModel = ChatOpenAI(model=model_name, **kwargs)

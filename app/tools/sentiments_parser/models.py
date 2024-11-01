@@ -248,6 +248,20 @@ class SentimentAnalysisResult(BaseModel):
         description="Optional breakdown of scores for different emotional intensities or confidence scores"
     )
 
+class ExtendedSentimentAnalysisResult(SentimentAnalysisResult, BaseModel):
+    """
+    The Result of the sentiment analysis reconstructed with the original text
+    """
+    text: str = Field(
+        description="The text to analyzed",
+    )
+    sentiment: SentimentCategoryType = Field(description="The sentiment category that was analyzed")
+    score: float = Field(description="The overall sentiment score for the text")
+    sub_scores: dict[str, float] = Field(
+        default_factory=dict,
+        description="Optional breakdown of scores for different emotional intensities or confidence scores"
+    )
+
 class SentimentsAnalysisCalls(BaseModel):
     """
     A list of sentiment categories to be analyzed.

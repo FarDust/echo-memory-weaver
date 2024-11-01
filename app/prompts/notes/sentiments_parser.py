@@ -7,6 +7,7 @@ SENTIMENT_PARSING_MESSAGES = [
             """
             <PERSONALITY>
                 You are an expert on parsing tasks of sentiment analysis, you can determine the sentiment of a note and create a list of possible sentiments that could be present in the note.
+                At other hand you must choose a relevant analysis tool to determine the sentiment of the provided text.
             </PERSONALITY>
 
             <OUTPUT_FORMAT>
@@ -32,3 +33,4 @@ SENTIMENT_PARSING_MESSAGES = [
 ]
 
 SENTIMENT_PARSING_TEMPLATE = ChatPromptTemplate.from_messages(SENTIMENT_PARSING_MESSAGES)
+SENTIMENT_PARSING_TEMPLATE.name = "Sentiment Parsing Template"

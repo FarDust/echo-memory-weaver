@@ -20,12 +20,12 @@ SENTIMENT_EVALUATION_MESSAGES = [
         "user",
         """
         <TASK>
-            Please analyze the following `TEXT` and execute the `ANALYSIS_CALL` to determine the sentiment strength. Format the response as a JSON defined in the `OUTPUT_FORMAT` section.
+            Please analyze the following `TEXT` and execute the evaluation over the `SENTIMENT` to determine the sentiment strength. Format the response as a JSON defined in the `OUTPUT_FORMAT` section.
         </TASK>
 
-        <ANALYSIS_CALL>
-            {analysis_call}
-        </ANALYSIS_CALL>
+        <SENTIMENT>
+            {sentiment}
+        </SENTIMENT>
 
         <TEXT>
             {text}
@@ -37,3 +37,4 @@ SENTIMENT_EVALUATION_MESSAGES = [
 ]
 
 SENTIMENT_EVALUATION_TEMPLATE = ChatPromptTemplate.from_messages(SENTIMENT_EVALUATION_MESSAGES)
+SENTIMENT_EVALUATION_TEMPLATE.name = "Sentiment Evaluation Template"
