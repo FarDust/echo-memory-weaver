@@ -10,7 +10,7 @@ class AcceptingOpen(BaseModel):
         "Accepting / Open",
         description="A state of acceptance and calmness, reflecting openness to experience."
     )
-    emotions: set[Literal[
+    emotions: list[Literal[
         "Calm", "Centered", "Content", "Fulfilled", "Patient",
         "Peaceful", "Present", "Relaxed", "Serene", "Trusting"
     ]] = Field(
@@ -22,7 +22,7 @@ class AlivenessJoy(BaseModel):
         "Aliveness / Joy",
         description="A state of heightened energy and happiness, often associated with joy and enthusiasm."
     )
-    emotions: set[Literal[
+    emotions: list[Literal[
         "Amazed", "Awe", "Bliss", "Delighted", "Eager", "Ecstatic",
         "Enchanted", "Energized", "Engaged", "Enthusiastic", "Excited",
         "Free", "Happy", "Inspired", "Invigorated", "Lively", "Passionate",
@@ -37,7 +37,7 @@ class Angry(BaseModel):
         "Angry",
         description="A state of frustration or irritation, often resulting in anger or aggression."
     )
-    emotions: set[Literal[
+    emotions: list[Literal[
         "Annoyed", "Agitated", "Aggravated", "Bitter", "Contempt",
         "Cynical", "Disdain", "Disgruntled", "Disturbed", "Edgy",
         "Exasperated", "Frustrated", "Furious", "Grouchy", "Hostile",
@@ -52,7 +52,7 @@ class Courageous(BaseModel):
         "Courageous",
         description="A state of bravery and confidence, reflecting strength and determination."
     )
-    emotions: set[Literal[
+    emotions: list[Literal[
         "Powerful", "Adventurous", "Brave", "Capable", "Confident",
         "Daring", "Determined", "Free", "Grounded", "Proud",
         "Strong", "Worthy", "Valiant"
@@ -65,7 +65,7 @@ class Connected(BaseModel):
         "Connected",
         description="A state of closeness and empathy, feeling connected to others or oneself."
     )
-    emotions: set[Literal[
+    emotions: list[Literal[
         "Loving", "Accepting", "Affectionate", "Caring", "Compassion",
         "Empathy", "Fulfilled", "Present", "Safe", "Warm",
         "Worthy", "Curious", "Engaged", "Exploring", "Fascinated",
@@ -79,7 +79,7 @@ class DespairSad(BaseModel):
         "Despair / Sad",
         description="A state of sorrow or hopelessness, often involving sadness or grief."
     )
-    emotions: set[Literal[
+    emotions: list[Literal[
         "Anguish", "Depressed", "Despondent", "Disappointed", "Discouraged",
         "Forlorn", "Gloomy", "Grief", "Heartbroken", "Hopeless",
         "Lonely", "Longing", "Melancholy", "Sorrow", "Teary",
@@ -93,7 +93,7 @@ class DisconnectedNumb(BaseModel):
         "Disconnected / Numb",
         description="A state of detachment or numbness, often involving emotional distance or apathy."
     )
-    emotions: set[Literal[
+    emotions: list[Literal[
         "Aloof", "Bored", "Confused", "Distant", "Empty",
         "Indifferent", "Isolated", "Lethargic", "Listless", "Removed",
         "Resistant", "Shut Down", "Uneasy", "Withdrawn"
@@ -106,7 +106,7 @@ class EmbarrassedShame(BaseModel):
         "Embarrassed / Shame",
         description="A state of self-consciousness or shame, often resulting in embarrassment or guilt."
     )
-    emotions: set[Literal[
+    emotions: list[Literal[
         "Ashamed", "Humiliated", "Inhibited", "Mortified", "Self-conscious",
         "Useless", "Weak", "Worthless"
     ]] = Field(
@@ -118,7 +118,7 @@ class Fear(BaseModel):
         "Fear",
         description="A state of apprehension or dread, often involving worry or anxiety."
     )
-    emotions: set[Literal[
+    emotions: list[Literal[
         "Afraid", "Anxious", "Apprehensive", "Frightened", "Hesitant",
         "Nervous", "Panic", "Paralyzed", "Scared", "Terrified", "Worried"
     ]] = Field(
@@ -130,7 +130,7 @@ class Fragile(BaseModel):
         "Fragile",
         description="A sensitive or vulnerable state, often involving feelings of helplessness."
     )
-    emotions: set[Literal["Helpless", "Sensitive"]] = Field(
+    emotions: list[Literal["Helpless", "Sensitive"]] = Field(
         description="List of emotions associated with feeling fragile or vulnerable."
     )
 
@@ -139,7 +139,7 @@ class Grateful(BaseModel):
         "Grateful",
         description="A state of appreciation or thankfulness, often involving feelings of fortune or blessing."
     )
-    emotions: set[Literal[
+    emotions: list[Literal[
         "Appreciative", "Blessed", "Delighted", "Fortunate", "Grace",
         "Humbled", "Lucky", "Moved", "Thankful", "Touched"
     ]] = Field(
@@ -151,7 +151,7 @@ class Guilt(BaseModel):
         "Guilt",
         description="A state of remorse or regret, often involving feelings of responsibility for harm caused."
     )
-    emotions: set[Literal["Regret", "Remorseful", "Sorry"]] = Field(
+    emotions: list[Literal["Regret", "Remorseful", "Sorry"]] = Field(
         description="List of emotions associated with guilt or remorse."
     )
 
@@ -160,7 +160,7 @@ class Hopeful(BaseModel):
         "Hopeful",
         description="A state of optimism or encouragement, often involving expectation or trust."
     )
-    emotions: set[Literal["Encouraged", "Expectant", "Optimistic", "Trusting"]] = Field(
+    emotions: list[Literal["Encouraged", "Expectant", "Optimistic", "Trusting"]] = Field(
         description="List of emotions associated with hope and optimism."
     )
 
@@ -169,7 +169,7 @@ class Powerless(BaseModel):
         "Powerless",
         description="A state of helplessness or resignation, often involving feelings of entrapment."
     )
-    emotions: set[Literal["Impotent", "Incapable", "Resigned", "Trapped", "Victim"]] = Field(
+    emotions: list[Literal["Impotent", "Incapable", "Resigned", "Trapped", "Victim"]] = Field(
         description="List of emotions associated with feeling powerless."
     )
 
@@ -178,7 +178,7 @@ class Tender(BaseModel):
         "Tender",
         description="A gentle or caring state, often involving feelings of vulnerability or warmth."
     )
-    emotions: set[Literal[
+    emotions: list[Literal[
         "Calm", "Caring", "Loving", "Reflective", "Self-loving", 
         "Serene", "Vulnerable", "Warm"
     ]] = Field(
@@ -190,7 +190,7 @@ class Stressed(BaseModel):
         "Stressed",
         description="A state of strain or tension, often involving feelings of anxiety or fatigue."
     )
-    emotions: set[Literal[
+    emotions: list[Literal[
         "Tense", "Anxious", "Burned out", "Cranky", "Depleted", "Edgy", 
         "Exhausted", "Frazzled", "Overwhelm", "Rattled", "Rejecting", 
         "Restless", "Shaken", "Tight", "Weary", "Worn out"
@@ -203,7 +203,7 @@ class UnsettledDoubt(BaseModel):
         "Unsettled / Doubt",
         description="A state of uncertainty or doubt, often involving feelings of skepticism or hesitation."
     )
-    emotions: set[Literal[
+    emotions: list[Literal[
         "Apprehensive", "Concerned", "Dissatisfied", "Disturbed", "Grouchy",
         "Hesitant", "Inhibited", "Perplexed", "Questioning", "Rejecting",
         "Reluctant", "Shocked", "Skeptical", "Suspicious", "Ungrounded",

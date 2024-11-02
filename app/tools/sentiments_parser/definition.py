@@ -1,4 +1,5 @@
 from functools import partial
+import json
 import numbers
 from operator import itemgetter
 from typing import Any, Generic, Optional, Type, TypeVar
@@ -87,6 +88,16 @@ def average_calculator(
                     result[key] = original_value
                 else:
                     result[key] = value
+        
+        for key, value in result.items():
+            if isinstance(value, float):
+                result[key] = round(value, 3)
+            elif isinstance(value, dict):
+                for sub_key, sub_value in value.items():
+                    if isinstance(sub_value, float):
+                        value[sub_key] = round(sub_value, 3)
+                    else:
+                        value[sub_key] = sub_value
         return input_type.model_validate(result)
     
     return RunnableLambda(
@@ -190,9 +201,11 @@ class SentimentsParserTool(BaseTool):
             tool = self.inference_tools[analysis_call.analysis_tool]
             executions.append(tool.invoke(input=analysis_call.model_dump()))
 
-        return SentimentsParserOutput(
+        result = SentimentsParserOutput(
             sentiments=executions
         )
+
+        return result
             
 
     def _run(
