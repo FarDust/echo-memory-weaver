@@ -2,7 +2,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 SENTIMENT_ANALYSIS_MESSAGES = [
     (
-        "system", 
+        "system",
         (
             """
             <PERSONALITY>
@@ -277,7 +277,7 @@ SENTIMENT_ANALYSIS_MESSAGES = [
                 </EXAMPLE_2>
             </EXAMPLES>
             """
-        )
+        ),
     ),
     (
         "user",
@@ -302,9 +302,11 @@ SENTIMENT_ANALYSIS_MESSAGES = [
 
         Response:
         
-        """
-    )
+        """,
+    ),
 ]
 
-SENTIMENT_ANALYSIS_TEMPLATE = ChatPromptTemplate.from_messages(SENTIMENT_ANALYSIS_MESSAGES)
+SENTIMENT_ANALYSIS_TEMPLATE = ChatPromptTemplate.from_messages(
+    SENTIMENT_ANALYSIS_MESSAGES
+)
 SENTIMENT_ANALYSIS_TEMPLATE.name = "Sentiment Analysis Template"

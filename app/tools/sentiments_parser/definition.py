@@ -1,8 +1,7 @@
 from functools import partial
-import json
 import numbers
 from operator import itemgetter
-from typing import Any, Generic, Optional, Type, TypeVar
+from typing import Any, Optional, Type
 
 from langchain_core.callbacks import (
     CallbackManagerForToolRun,
@@ -13,35 +12,43 @@ from langchain_core.prompt_values import PromptValue
 from langchain_core.prompts.chat import ChatPromptTemplate
 from langchain_core.messages import ChatMessage
 from langchain_core.runnables import Runnable, RunnableParallel, RunnableLambda
-from langchain_core.output_parsers import PydanticOutputParser
 
 from app.chat_models.base import base_inference_chain
 from logging import getLogger, Logger
 
-from app.prompts.notes.sentiments_evaluation import SENTIMENT_EVALUATION_TEMPLATE
-from app.prompts.notes.sentiments_parser import SENTIMENT_PARSING_TEMPLATE
-from app.tools.sentiments_parser.models import SentimentAnalysisCall, SentimentAnalysisResult, SentimentsAnalysisCalls, AnalysisModels
+from app.prompts.notes.sentiments.evaluation import SENTIMENT_EVALUATION_TEMPLATE
+from app.prompts.notes.sentiments.parser import SENTIMENT_PARSING_TEMPLATE
+from app.tools.sentiments_parser.models import (
+    SentimentAnalysisCall,
+    SentimentAnalysisResult,
+    SentimentsAnalysisCalls,
+    AnalysisModels,
+)
 
 
 class SentimentsParserInput(BaseModel):
     """
     The input of the Sentiments Parser
     """
+
     text: str = Field(
         description="The text that would be parsed for sentiments extractions",
     )
+
 
 class SentimentsParserOutput(BaseModel):
     """
     The output of the Sentiments Parser
     """
+
     sentiments: list[SentimentAnalysisResult] = Field(
         description="The list of sentiments extracted from the text and their scores",
     )
 
+
 def average_calculator(
-        input_type: Type[BaseModel],
-        ) -> Runnable:
+    input_type: Type[BaseModel],
+) -> Runnable:
     """
     given a list of scores, calculate the average of the scores.
 
@@ -82,13 +89,17 @@ def average_calculator(
                     for sub_key, sub_value in value.items():
                         if isinstance(sub_value, numbers.Number):
                             original_sub_value = original_value.get(sub_key, 0)
-                            original_value[sub_key] = (original_sub_value * index + sub_value) / (index + 1)
+                            original_value[sub_key] = (
+                                original_sub_value * index + sub_value
+                            ) / (index + 1)
                         else:
-                            original_value[sub_key] = sub_value # Todo: Change to frequency counter
+                            original_value[sub_key] = (
+                                sub_value  # Todo: Change to frequency counter
+                            )
                     result[key] = original_value
                 else:
                     result[key] = value
-        
+
         for key, value in result.items():
             if isinstance(value, float):
                 result[key] = round(value, 3)
@@ -99,20 +110,18 @@ def average_calculator(
                     else:
                         value[sub_key] = sub_value
         return input_type.model_validate(result)
-    
+
     return RunnableLambda(
         func=_average_from_pydantic_scores,
         name="Average Calculator",
     )
 
-    
-
 
 def naive_llm_sentiment_strength_evaluator(
-        input_type: Type[BaseModel] = SentimentAnalysisCall,
-        structured_output: Type[BaseModel] = SentimentAnalysisResult,
-        executions: int = 5,
-        ) -> BaseTool:
+    input_type: Type[BaseModel] = SentimentAnalysisCall,
+    structured_output: Type[BaseModel] = SentimentAnalysisResult,
+    executions: int = 5,
+) -> BaseTool:
     """
     Tool to naively evaluate the sentiment strength of a text using
     an LLM
@@ -132,29 +141,32 @@ def naive_llm_sentiment_strength_evaluator(
         The tool to evaluate the sentiment strength of a text using an LLM
     """
 
-    template = RunnableLambda(lambda x: {
-            **x,
-            **{
-                "structured_output": structured_output.model_json_schema()
+    template = (
+        RunnableLambda(
+            lambda x: {
+                **x,
+                **{"structured_output": structured_output.model_json_schema()},
             }
-        }) | SENTIMENT_EVALUATION_TEMPLATE
-    
-    base_chain =  ( template | base_inference_chain(structured_output=structured_output)).as_tool(
-                args_schema=input_type,
-                name="Naive Sentiment Evaluator",
-                description="Tool to naively evaluate the sentiment strength of a text using an LLM",
-            )
-    
-    calculator = average_calculator(
-        input_type=SentimentAnalysisResult
+        )
+        | SENTIMENT_EVALUATION_TEMPLATE
     )
-    
-    final_chain: Runnable = RunnableParallel(
-        {
-            str(index): base_chain for index in range(executions)
-        }
-    ) | calculator
+
+    base_chain = (
+        template | base_inference_chain(structured_output=structured_output)
+    ).as_tool(
+        args_schema=input_type,
+        name="Naive Sentiment Evaluator",
+        description="Tool to naively evaluate the sentiment strength of a text using an LLM",
+    )
+
+    calculator = average_calculator(input_type=SentimentAnalysisResult)
+
+    final_chain: Runnable = (
+        RunnableParallel({str(index): base_chain for index in range(executions)})
+        | calculator
+    )
     return final_chain
+
 
 class SentimentsParserTool(BaseTool):
     name: str = "Sentiments Parser"
@@ -166,32 +178,32 @@ class SentimentsParserTool(BaseTool):
     return_direct: bool = True
     prompt: ChatPromptTemplate = Field(
         description="The prompt to be used in the tool",
-        default= RunnableLambda(lambda x: {
-            **x,
-            **{
-                "structured_output": SentimentsAnalysisCalls.model_json_schema()
+        default=RunnableLambda(
+            lambda x: {
+                **x,
+                **{"structured_output": SentimentsAnalysisCalls.model_json_schema()},
             }
-        }) | SENTIMENT_PARSING_TEMPLATE
+        )
+        | SENTIMENT_PARSING_TEMPLATE,
     )
     inference_model: Runnable[str | list[ChatMessage] | PromptValue, ChatMessage] = (
         Field(
             description="The chat model to use for the tool",
-            default_factory=partial(base_inference_chain, structured_output=SentimentsAnalysisCalls),
+            default_factory=partial(
+                base_inference_chain, structured_output=SentimentsAnalysisCalls
+            ),
         )
     )
 
     inference_tools: dict[AnalysisModels, BaseTool] = Field(
         description="The tools to be used for the inference",
-        default_factory=lambda: {
-            "llm": naive_llm_sentiment_strength_evaluator()
-        },
+        default_factory=lambda: {"llm": naive_llm_sentiment_strength_evaluator()},
     )
 
     _logger: Logger = getLogger(__name__)
 
     def route_analysis_calls(
-        self,
-        inputs: SentimentsAnalysisCalls
+        self, inputs: SentimentsAnalysisCalls
     ) -> SentimentsParserOutput:
         """Route the analysis call to the correct tool"""
 
@@ -201,12 +213,9 @@ class SentimentsParserTool(BaseTool):
             tool = self.inference_tools[analysis_call.analysis_tool]
             executions.append(tool.invoke(input=analysis_call.model_dump()))
 
-        result = SentimentsParserOutput(
-            sentiments=executions
-        )
+        result = SentimentsParserOutput(sentiments=executions)
 
         return result
-            
 
     def _run(
         self,
@@ -215,15 +224,13 @@ class SentimentsParserTool(BaseTool):
     ) -> SentimentsParserOutput:
         """Use the tool to extract the sentiments from the text"""
 
-        analysis_calls_chain : Runnable = {
-            "text": itemgetter("text")
-        } | self.prompt | self.inference_model | RunnableLambda(
-            func=self.route_analysis_calls,
-            name="Route Analysis Calls",
+        analysis_calls_chain: Runnable = (
+            {"text": itemgetter("text")}
+            | self.prompt
+            | self.inference_model
+            | RunnableLambda(
+                func=self.route_analysis_calls,
+                name="Route Analysis Calls",
+            )
         )
-        return analysis_calls_chain.invoke(
-            input={
-                "text": text
-            }
-        )
-        
+        return analysis_calls_chain.invoke(input={"text": text})

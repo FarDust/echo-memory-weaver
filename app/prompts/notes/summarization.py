@@ -2,7 +2,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 SUMMARIZATION_MESSAGES = [
     (
-        "system", 
+        "system",
         (
             """
             <PERSONALITY>
@@ -53,7 +53,7 @@ SUMMARIZATION_MESSAGES = [
                 </OUTPUT>
             </EXAMPLE>
             """
-        )
+        ),
     ),
     (
         "user",
@@ -77,8 +77,8 @@ SUMMARIZATION_MESSAGES = [
         </NOTE>
 
         Markdown Response:
-        """
-    )
+        """,
+    ),
 ]
 
 SUMMARIZATION_TEMPLATE = ChatPromptTemplate.from_messages(SUMMARIZATION_MESSAGES)

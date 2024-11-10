@@ -21,7 +21,7 @@ SENTIMENT_EVALUATION_MESSAGES = [
                 {structured_output}
             </OUTPUT_FORMAT>
             """
-        )
+        ),
     ),
     (
         "user",
@@ -39,9 +39,11 @@ SENTIMENT_EVALUATION_MESSAGES = [
         </TEXT>
 
         Formatted Output:
-        """
-    )
+        """,
+    ),
 ]
 
-SENTIMENT_EVALUATION_TEMPLATE = ChatPromptTemplate.from_messages(SENTIMENT_EVALUATION_MESSAGES)
+SENTIMENT_EVALUATION_TEMPLATE = ChatPromptTemplate.from_messages(
+    SENTIMENT_EVALUATION_MESSAGES
+)
 SENTIMENT_EVALUATION_TEMPLATE.name = "Sentiment Evaluation Template"

@@ -7,9 +7,10 @@ from pydantic import BaseModel
 
 
 def base_inference_chain(
-        model_name: str = "gpt-4o-mini",
-        structured_output: Type[BaseModel] | None = None,
-        **kwargs) -> Runnable:
+    model_name: str = "gpt-4o-mini",
+    structured_output: Type[BaseModel] | None = None,
+    **kwargs,
+) -> Runnable:
     def _default_model_invoke(inputs) -> ChatMessage:
         chat_model: BaseChatModel = ChatOpenAI(model=model_name, **kwargs)
         final_runnable: Runnable = chat_model

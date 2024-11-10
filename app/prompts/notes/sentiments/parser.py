@@ -14,7 +14,7 @@ SENTIMENT_PARSING_MESSAGES = [
                 {structured_output}
             </OUTPUT_FORMAT>
             """
-        )
+        ),
     ),
     (
         "user",
@@ -28,9 +28,11 @@ SENTIMENT_PARSING_MESSAGES = [
         </TEXT>
 
         Formatted Output:
-        """
-    )
+        """,
+    ),
 ]
 
-SENTIMENT_PARSING_TEMPLATE = ChatPromptTemplate.from_messages(SENTIMENT_PARSING_MESSAGES)
+SENTIMENT_PARSING_TEMPLATE = ChatPromptTemplate.from_messages(
+    SENTIMENT_PARSING_MESSAGES
+)
 SENTIMENT_PARSING_TEMPLATE.name = "Sentiment Parsing Template"
