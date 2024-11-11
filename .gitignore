@@ -273,6 +273,7 @@ $RECYCLE.BIN/
 
 volumes/*
 light_rag
+nano_graph_rag/*
 knowledge_graph.html
 assets/personal/**/*
 !assets/personal/.keep

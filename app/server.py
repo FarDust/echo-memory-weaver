@@ -46,7 +46,6 @@ add_routes(
         context=base_context,
         ingest_tool=NanoGraphRAGInterface(
             user="gabriel",
-            context=base_context,
         ),
     ),
     path="/notes",
@@ -56,9 +55,8 @@ add_routes(
     app,
     NanoGraphRAGInterface(
         user="gabriel",
-        default_insert_mode=False,
     ),
-    path="/local",
+    path="/search",
 )
 
 add_routes(

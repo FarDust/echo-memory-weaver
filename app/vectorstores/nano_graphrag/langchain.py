@@ -72,11 +72,6 @@ class LangChainVectorDBStorage(BaseVectorStorage):
         if not len(data):
             self._logger.warning("You insert an empty data to vector DB")
             return []
-        print(json.dumps(
-            data,
-            indent=4,
-            default=str
-        ))
         list_data = [
             {
                 "__id__": k,

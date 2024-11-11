@@ -40,9 +40,9 @@ class NanoGraphRAGInput(BaseModel):
         description="The mode to be used to intervene the user query",
         default="local",
     )
-    insert_mode: bool | None = Field(
+    insert_mode: bool = Field(
         description="True to insert the text, False to query the text",
-        default=None,
+        default=True,
     )
 
 
@@ -53,10 +53,6 @@ class NanoGraphRAGInterface(BaseTool):
     return_direct: bool = True
     user: str = Field(
         description="The user to be used in the tool",
-    )
-    context: str = Field(
-        description="The context to be used in the tool to known the user",
-        default="",
     )
     inference_model: Runnable[str | list[ChatMessage] | PromptValue, ChatMessage] = (
         Field(
@@ -72,11 +68,6 @@ class NanoGraphRAGInterface(BaseTool):
     user_prompt: str = Field(
         description="The prompt to be used to intervene the user query",
         default="{query}",
-    )
-
-    default_insert_mode: bool = Field(
-        description="The mode to be used to intervene the user query",
-        default=True,
     )
 
     _logger: Logger = getLogger(__name__)
@@ -121,16 +112,17 @@ class NanoGraphRAGInterface(BaseTool):
         texts: list[str],
         dimension: str = NanoGraphRAGInput.model_fields["dimension"].default,
         mode: str = NanoGraphRAGInput.model_fields["mode"].default,
-        insert_mode: bool = NanoGraphRAGInput.model_fields["insert_mode"].default,
         run_manager: Optional[CallbackManagerForToolRun] = None,
+        *,
+        insert_mode: bool = NanoGraphRAGInput.model_fields["insert_mode"].default,
     ) -> list[str]:
         """Use the tool synchronously to ingest user data."""
 
-        db_path = Path(f"./nano_graph_rag/{self.user}").absolute().resolve()
+        db_path = Path(f"./nano_graph_rag/{self.user}/{dimension}").absolute().resolve()
         db_path.mkdir(parents=True, exist_ok=True)
 
         neo4j_config = {
-            "neo4j_url": os.environ.get("NEO4J_URL", "neo4j://localhost:7687"),
+            "neo4j_url": f"neo4j://localhost:7687?db={self.user}_{dimension}",
             "neo4j_auth": (
                 os.environ.get("NEO4J_USER", "neo4j"),
                 os.environ.get("NEO4J_PASSWORD", "test"),
@@ -163,7 +155,7 @@ class NanoGraphRAGInterface(BaseTool):
             addon_params=neo4j_config,
         )
 
-        if (self.default_insert_mode and insert_mode is None) or ( insert_mode is not None and insert_mode):
+        if insert_mode:
             rag.insert(texts)
             return_texts = [
                 compute_mdhash_id(text.strip(), prefix="doc-")

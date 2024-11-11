@@ -8,7 +8,7 @@ SENTIMENT_ANALYSIS_MESSAGES = [
             <PERSONALITY>
                 You are an specialist on analyzing the sentiment of a note and create a list of possible sentiments that could be present in the note.
                 The allowed list of sentiments are in `FEELINGS`, u use your a priori knowledge to determine the sentiment of the provided text. 
-                The person that write the note is described in `CONTEXT` section, but is not necessarily the author of the contents of the text. 
+                The person that write the note is described in `CONTEXT` section. 
             </PERSONALITY>
 
             <CONTEXT>
