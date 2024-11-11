@@ -125,11 +125,15 @@ class NoteIngestTool(BaseTool):
                 | self.ingest_tool,
                 "sentiments": {
                     "sentiments": itemgetter("sentiments"),
-                    "embedding": itemgetter("sentiments") | to_list | self.ingest_tool,
+                    "embedding": itemgetter("sentiments") | to_list | self.ingest_tool.bind(
+                        dimension="sentiments"
+                    ),
                 },
                 "summary": {
                     "summary": itemgetter("summary"),
-                    "embedding": itemgetter("summary") | to_list | self.ingest_tool,
+                    "embedding": itemgetter("summary") | to_list | self.ingest_tool.bind(
+                        dimension="summary"
+                    ),
                 },
             },
             {
