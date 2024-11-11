@@ -1,5 +1,6 @@
 import asyncio
 from dataclasses import dataclass, field
+import json
 from typing import Type
 from nano_graphrag.base import BaseVectorStorage
 from logging import getLogger, Logger

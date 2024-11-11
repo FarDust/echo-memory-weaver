@@ -7,7 +7,7 @@ SUMMARIZATION_MESSAGES = [
             """
             <PERSONALITY>
                 You are an specialist on summarize the content of a note in key points and analyze objectivity of the content of the note.
-                The person that write the note is described in `CONTEXT` section, but is not necessarily the author of the contents of the text.
+                The person that write the note is described in `CONTEXT` section.
             </PERSONALITY>
 
             <CONTEXT>
@@ -71,6 +71,10 @@ SUMMARIZATION_MESSAGES = [
 
                 --- End the response after the final conclusion ---
         </TASK>
+
+        <CONTEXT>
+            {context}
+        </CONTEXT>
 
         <NOTE>
             {formatted_note}

@@ -46,7 +46,6 @@ add_routes(
         context=base_context,
         ingest_tool=NanoGraphRAGInterface(
             user="gabriel",
-            context=base_context,
         ),
     ),
     path="/notes",
@@ -56,9 +55,8 @@ add_routes(
     app,
     NanoGraphRAGInterface(
         user="gabriel",
-        insert_mode=False,
     ),
-    path="/global",
+    path="/search",
 )
 
 add_routes(
@@ -66,6 +64,16 @@ add_routes(
     SentimentsParserTool(),
     path="/sentiments",
 )
+
+# Mark timestamp on the chain to tag user evolution and allow override for batch past events
+# Get Sentiments from a text
+# Get summaries for text
+# Create GraphRag Communities for Summaries? maybe use the whole text makes more sense? But maybe no depending on the token length?
+# Create GraphRag Communities for Sentiments
+# Run Sentiments strength analysis over extracted Sentiments index them into somewhere. Where is the best place to store this?
+# Create GraphRag of topics of interest for the user? Maybe query the Summaries and Sentiments and create a GraphRag of the topics of interest for the user
+# Add marks for private and public data given structured categories. What categorization is the best for this? Something like very private (For sexual orientation, health, etc), private (For personal data), inner circle (For mentioned friends, family, etc), outer circle (For data that the user is ok to share with not so close people and family), public (For data that the user is ok to share with everyone)
+
 
 if __name__ == "__main__":
     import uvicorn

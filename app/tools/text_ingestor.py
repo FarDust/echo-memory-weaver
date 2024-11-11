@@ -125,11 +125,11 @@ class NoteIngestTool(BaseTool):
                 | self.ingest_tool,
                 "sentiments": {
                     "sentiments": itemgetter("sentiments"),
-                    "embedding": itemgetter("sentiments") | to_list | self.ingest_tool,
+                    "embedding": itemgetter("sentiments") | to_list | RunnableLambda(lambda x: {**x, "dimension": "sentiment"}) | self.ingest_tool,
                 },
                 "summary": {
                     "summary": itemgetter("summary"),
-                    "embedding": itemgetter("summary") | to_list | self.ingest_tool,
+                    "embedding": itemgetter("summary") | to_list | RunnableLambda(lambda x: {**x, "dimension": "summary"}) | self.ingest_tool,
                 },
             },
             {
