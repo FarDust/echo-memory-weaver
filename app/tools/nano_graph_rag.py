@@ -1,9 +1,11 @@
-from lightrag import LightRAG, QueryParam
-from lightrag.utils import EmbeddingFunc
+import os
+from nano_graphrag import GraphRAG, QueryParam
+from nano_graphrag._storage import Neo4jStorage
+from nano_graphrag.graphrag import EmbeddingFunc, compute_mdhash_id
 from pathlib import Path
 import numpy as np
 
-from typing import Optional, Type
+from typing import Literal, Optional, Type
 
 from langchain_core.callbacks import (
     CallbackManagerForToolRun,
@@ -15,28 +17,42 @@ from langchain_core.messages import ChatMessage
 from langchain_core.runnables import Runnable
 from langchain_core.output_parsers import StrOutputParser
 
-from app.embeddings.base import base_embedding_chain
+from app.embeddings.base import base_embedding_chain, default_embedding
 from app.chat_models.base import base_inference_chain
 from logging import getLogger, Logger
+from langchain_milvus import Milvus
 
+from app.vectorstores.nano_graphrag.langchain import LangChainVectorDBStorage
 
-class LightRAGInput(BaseModel):
+class NanoGraphRAGInput(BaseModel):
     texts: list[str] = Field(
-        description="The text to be ingested",
+        description="The text to be ingested or retrieved",
+    )
+    dimension: Literal[
+        "sentiment",
+        "summary",
+        "default"
+    ] = Field(
+        description="The dimension where the text is expected to be stored",
+        default="default",
+    )
+    mode: Literal["local", "global"] = Field(
+        description="The mode to be used to intervene the user query",
+        default="local",
+    )
+    insert_mode: bool = Field(
+        description="True to insert the text, False to query the text",
+        default=True,
     )
 
 
-class LightRAGInterface(BaseTool):
-    name: str = "LightRAG"
+class NanoGraphRAGInterface(BaseTool):
+    name: str = "NanoGraphRAG"
     description: str = "useful to store text data a understand it better with a graph"
-    args_schema: Type[BaseModel] = LightRAGInput
+    args_schema: Type[BaseModel] = NanoGraphRAGInput
     return_direct: bool = True
     user: str = Field(
         description="The user to be used in the tool",
-    )
-    context: str = Field(
-        description="The context to be used in the tool to known the user",
-        default="",
     )
     inference_model: Runnable[str | list[ChatMessage] | PromptValue, ChatMessage] = (
         Field(
@@ -52,11 +68,6 @@ class LightRAGInterface(BaseTool):
     user_prompt: str = Field(
         description="The prompt to be used to intervene the user query",
         default="{query}",
-    )
-
-    insert_mode: bool = Field(
-        description="The mode to be used to intervene the user query",
-        default=True,
     )
 
     _logger: Logger = getLogger(__name__)
@@ -99,27 +110,59 @@ class LightRAGInterface(BaseTool):
     def _run(
         self,
         texts: list[str],
+        dimension: str = NanoGraphRAGInput.model_fields["dimension"].default,
+        mode: str = NanoGraphRAGInput.model_fields["mode"].default,
         run_manager: Optional[CallbackManagerForToolRun] = None,
+        *,
+        insert_mode: bool = NanoGraphRAGInput.model_fields["insert_mode"].default,
     ) -> list[str]:
         """Use the tool synchronously to ingest user data."""
 
-        db_path = Path(f"./light_rag/{self.user}").absolute().resolve()
+        db_path = Path(f"./nano_graph_rag/{self.user}/{dimension}").absolute().resolve()
         db_path.mkdir(parents=True, exist_ok=True)
 
-        rag = LightRAG(
-            working_dir=db_path,
-            llm_model_func=self.inference_model_langchain_adapter(),
+        neo4j_config = {
+            "neo4j_url": f"neo4j://localhost:7687?db={self.user}_{dimension}",
+            "neo4j_auth": (
+                os.environ.get("NEO4J_USER", "neo4j"),
+                os.environ.get("NEO4J_PASSWORD", "test"),
+            )
+        }
+
+        rag = GraphRAG(
+            working_dir=str(db_path),
+            best_model_func=self.inference_model_langchain_adapter(),
+            cheap_model_func=self.inference_model_langchain_adapter(),
             embedding_func=EmbeddingFunc(
                 embedding_dim=1536, max_token_size=819, func=self.embedding_adapter
             ),
+            enable_naive_rag=True,
+            vector_db_storage_cls=LangChainVectorDBStorage,
+            vector_db_storage_cls_kwargs={
+                "vector_store_class": Milvus,
+                "vector_store_class_kwargs": {
+                    "collection_name": f"{self.user}_{dimension}_nano_graph_rag",
+                    "connection_args": {
+                        "host": "localhost",
+                        "port": "19530",
+                        # "user": "your_usernam",  # If authentication is enabled
+                        # "password": "your_password",  # If authentication is enabled
+                        # "db_name": self.user,
+                    },
+                },
+            },
+            graph_storage_cls=Neo4jStorage,
+            addon_params=neo4j_config,
         )
 
-        return_texts = ["Inserted"]
-
-        if self.insert_mode:
+        if insert_mode:
             rag.insert(texts)
+            return_texts = [
+                compute_mdhash_id(text.strip(), prefix="doc-")
+                for text in texts
+            ]
         else:
             return_texts = [
-                rag.query(text, param=QueryParam(mode="global")) for text in texts
+                rag.query(text, param=QueryParam(mode=mode)) for text in texts
             ]
         return return_texts

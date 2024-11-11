@@ -7,7 +7,8 @@ from langchain_openai.chat_models import ChatOpenAI
 from langchain import hub
 from pathlib import Path
 
-from app.tools.light_rag import LightRAGInterface
+from app.tools.sentiments_parser.definition import SentimentsParserTool
+from app.tools.nano_graph_rag import NanoGraphRAGInterface
 from app.tools.text_ingestor import NoteIngestTool
 
 
@@ -28,6 +29,8 @@ def sample_chain() -> Runnable:
     return prompt | ChatOpenAI(name="gpt-4o-mini")
 
 
+base_context = Path("assets/personal/gabriel.md").read_text(encoding="utf-8")
+
 # Edit this to add the chain you want to add
 add_routes(
     app,
@@ -40,8 +43,8 @@ add_routes(
 add_routes(
     app,
     NoteIngestTool(
-        context=Path("assets/personal/gabriel.md").read_text(encoding="utf-8"),
-        ingest_tool=LightRAGInterface(
+        context=base_context,
+        ingest_tool=NanoGraphRAGInterface(
             user="gabriel",
         ),
     ),
@@ -50,12 +53,27 @@ add_routes(
 
 add_routes(
     app,
-    LightRAGInterface(
+    NanoGraphRAGInterface(
         user="gabriel",
-        insert_mode=False,
     ),
-    path="/global",
+    path="/search",
 )
+
+add_routes(
+    app,
+    SentimentsParserTool(),
+    path="/sentiments",
+)
+
+# Mark timestamp on the chain to tag user evolution and allow override for batch past events
+# Get Sentiments from a text
+# Get summaries for text
+# Create GraphRag Communities for Summaries? maybe use the whole text makes more sense? But maybe no depending on the token length?
+# Create GraphRag Communities for Sentiments
+# Run Sentiments strength analysis over extracted Sentiments index them into somewhere. Where is the best place to store this?
+# Create GraphRag of topics of interest for the user? Maybe query the Summaries and Sentiments and create a GraphRag of the topics of interest for the user
+# Add marks for private and public data given structured categories. What categorization is the best for this? Something like very private (For sexual orientation, health, etc), private (For personal data), inner circle (For mentioned friends, family, etc), outer circle (For data that the user is ok to share with not so close people and family), public (For data that the user is ok to share with everyone)
+
 
 if __name__ == "__main__":
     import uvicorn

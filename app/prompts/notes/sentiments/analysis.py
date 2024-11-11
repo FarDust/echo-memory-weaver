@@ -2,14 +2,13 @@ from langchain_core.prompts import ChatPromptTemplate
 
 SENTIMENT_ANALYSIS_MESSAGES = [
     (
-        "system", 
+        "system",
         (
             """
             <PERSONALITY>
                 You are an specialist on analyzing the sentiment of a note and create a list of possible sentiments that could be present in the note.
-                The allowed list of sentiments are in `FEELINGS`, u use your a priori knowledge to determine the sentiment of the note. 
-                The person that write the note is described in `CONTEXT` section.
-                described 
+                The allowed list of sentiments are in `FEELINGS`, u use your a priori knowledge to determine the sentiment of the provided text. 
+                The person that write the note is described in `CONTEXT` section. 
             </PERSONALITY>
 
             <CONTEXT>
@@ -278,7 +277,7 @@ SENTIMENT_ANALYSIS_MESSAGES = [
                 </EXAMPLE_2>
             </EXAMPLES>
             """
-        )
+        ),
     ),
     (
         "user",
@@ -303,8 +302,11 @@ SENTIMENT_ANALYSIS_MESSAGES = [
 
         Response:
         
-        """
-    )
+        """,
+    ),
 ]
 
-SENTIMENT_ANALYSIS_TEMPLATE = ChatPromptTemplate.from_messages(SENTIMENT_ANALYSIS_MESSAGES)
+SENTIMENT_ANALYSIS_TEMPLATE = ChatPromptTemplate.from_messages(
+    SENTIMENT_ANALYSIS_MESSAGES
+)
+SENTIMENT_ANALYSIS_TEMPLATE.name = "Sentiment Analysis Template"

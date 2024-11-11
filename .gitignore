@@ -271,7 +271,9 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,macos,linux,windows
 
+volumes/*
 light_rag
+nano_graph_rag/*
 knowledge_graph.html
 assets/personal/**/*
 !assets/personal/.keep

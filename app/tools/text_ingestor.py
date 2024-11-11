@@ -8,20 +8,26 @@ from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
 from langchain_core.prompt_values import PromptValue
 from langchain_core.messages import ChatMessage
-from langchain_core.runnables import Runnable, RunnableLambda, RunnableSequence, RunnablePassthrough
+from langchain_core.runnables import (
+    Runnable,
+    RunnableLambda,
+    RunnableSequence,
+    RunnablePassthrough,
+)
 from app.chat_models.base import base_inference_chain
 from langchain_core.prompts.chat import ChatPromptTemplate
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
 from app.embeddings.base import base_embedding_chain
-from app.prompts.notes.sentiment import SENTIMENT_ANALYSIS_TEMPLATE
+from app.prompts.notes.sentiments.analysis import SENTIMENT_ANALYSIS_TEMPLATE
 from app.prompts.notes.summarization import SUMMARIZATION_TEMPLATE
 
 
 class NoteIngestInput(BaseModel):
     title: str = Field(
         description="The title of the note",
+        default="",
     )
     text: str = Field(
         description="The text to be ingested",
@@ -40,6 +46,7 @@ class PromptTasks(BaseModel):
         description="The sentiment categorization prompt to be used",
     )
 
+
 class NoteIngestTool(BaseTool):
     name: str = "Note Ingest, Summarize & Categorization"
     description: str = (
@@ -57,7 +64,7 @@ class NoteIngestTool(BaseTool):
             default_factory=base_inference_chain,
         )
     )
-    ingest_tool: Runnable[list[str], list[list[float]]] = Field(
+    ingest_tool: Runnable = Field(
         description="The embedding model to use for the tool",
         default_factory=base_embedding_chain,
     )
@@ -66,11 +73,13 @@ class NoteIngestTool(BaseTool):
         default=PromptTasks(
             sentiments_categorization=SENTIMENT_ANALYSIS_TEMPLATE,
             summarization=SUMMARIZATION_TEMPLATE,
-        )
+        ),
     )
     text_formatter: PromptTemplate = Field(
         description="The template to be used for the prompt",
-        default_factory=lambda: PromptTemplate.from_template("Title: {title}\n\nText: {text}\n\nExtra: {extra}\n\n")
+        default_factory=lambda: PromptTemplate.from_template(
+            "Title: {title}\n\nText: {text}\n\nExtra: {extra}\n\n"
+        ),
     )
 
     def _run(
@@ -82,7 +91,9 @@ class NoteIngestTool(BaseTool):
     ) -> str:
         """Use the tool synchronously."""
 
-        to_list: Runnable = RunnableLambda(lambda x: [x]) | {"texts": RunnablePassthrough() }
+        to_list: Runnable = RunnableLambda(lambda x: [x]) | {
+            "texts": RunnablePassthrough()
+        }
         compile_to_simple_text = RunnableLambda(
             lambda inputs: self.text_formatter.format(**inputs)
         )
@@ -109,17 +120,16 @@ class NoteIngestTool(BaseTool):
                 | StrOutputParser(),
             },
             {
-                "bare_ingest": itemgetter("formatted_note") | to_list 
-                    | self.ingest_tool,
+                "bare_ingest": itemgetter("formatted_note")
+                | to_list
+                | self.ingest_tool,
                 "sentiments": {
                     "sentiments": itemgetter("sentiments"),
-                    "embedding": itemgetter("sentiments")
-                    | to_list
-                    | self.ingest_tool,
+                    "embedding": itemgetter("sentiments") | to_list | RunnableLambda(lambda x: {**x, "dimension": "sentiment"}) | self.ingest_tool,
                 },
                 "summary": {
                     "summary": itemgetter("summary"),
-                    "embedding": itemgetter("summary") | to_list | self.ingest_tool,
+                    "embedding": itemgetter("summary") | to_list | RunnableLambda(lambda x: {**x, "dimension": "summary"}) | self.ingest_tool,
                 },
             },
             {
@@ -127,7 +137,6 @@ class NoteIngestTool(BaseTool):
                 "sentiments": itemgetter("sentiments"),
                 "summary": itemgetter("summary"),
             },
-            RunnableLambda(lambda x: x)
         )
 
         return base_chain.invoke({"title": title, "text": text, "extra": extra})
